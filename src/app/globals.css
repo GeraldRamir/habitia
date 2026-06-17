@@ -1,26 +1,179 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #0F172A;
+  --secondary: #2563EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --background: #F8FAFC;
+  --card: #FFFFFF;
+  --title: #111827;
+  --muted: #6B7280;
+  --radius: 20px;
+  --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.12);
+  --transition: 0.3s ease;
+}
+
+.dark {
+  --primary: #F8FAFC;
+  --secondary: #3B82F6;
+  --background: #0F172A;
+  --card: #1E293B;
+  --title: #F8FAFC;
+  --muted: #94A3B8;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-title: var(--title);
+  --color-muted: var(--muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-card: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--title);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition: background var(--transition), color var(--transition);
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: calc(var(--radius) / 2);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all var(--transition);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.btn-primary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--primary);
+  color: white;
+}
+
+.dark .btn-secondary {
+  background: #334155;
+  color: #F8FAFC;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--muted);
+  color: var(--title);
+}
+
+.btn-outline:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: calc(var(--radius) / 2);
+  border: 1.5px solid #E5E7EB;
+  background: var(--card);
+  color: var(--title);
+  font-size: 0.875rem;
+  transition: border-color var(--transition);
+  outline: none;
+}
+
+.dark .input {
+  border-color: #334155;
+}
+
+.input:focus {
+  border-color: var(--secondary);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: calc(var(--radius) / 2);
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast-enter {
+  animation: slideIn 0.3s ease;
+}
+
+.badge-destacada { background: #2563EB; color: white; }
+.badge-nueva { background: #10B981; color: white; }
+.badge-oferta { background: #F59E0B; color: white; }
+
+.chat-bubble-sent {
+  background: #DCF8C6;
+  border-radius: 18px 18px 4px 18px;
+}
+
+.dark .chat-bubble-sent {
+  background: #1D4ED8;
+  color: white;
+}
+
+.chat-bubble-received {
+  background: white;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.dark .chat-bubble-received {
+  background: #334155;
 }
