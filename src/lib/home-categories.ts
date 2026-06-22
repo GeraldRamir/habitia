@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { PropertyType } from "./types";
 import {
   Home,
@@ -23,7 +24,7 @@ export type HomeCategoryId =
 export interface HomeCategory {
   id: HomeCategoryId;
   label: string;
-  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
 }
 
 export const HOME_CATEGORIES: HomeCategory[] = [

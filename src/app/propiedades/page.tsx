@@ -7,23 +7,43 @@ import { PropertyFilters, filterProperties } from "@/components/property/Propert
 import { PropertyCardSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getProperties, getUserById } from "@/lib/storage";
-import type { Property, PropertyFilters as Filters } from "@/lib/types";
+import type { Property, PropertyFilters as Filters, PropertyType, PropertyStatus } from "@/lib/types";
 import { Search } from "lucide-react";
+
+function filtersFromParams(searchParams: URLSearchParams): Filters {
+  const type = searchParams.get("type");
+  const status = searchParams.get("status");
+  return {
+    search: searchParams.get("search") || undefined,
+    city: searchParams.get("city") || undefined,
+    type: (type as PropertyType) || undefined,
+    status: (status as PropertyStatus) || undefined,
+    minPrice: searchParams.get("minPrice")
+      ? Number(searchParams.get("minPrice"))
+      : undefined,
+    maxPrice: searchParams.get("maxPrice")
+      ? Number(searchParams.get("maxPrice"))
+      : undefined,
+    sort: "recent",
+  };
+}
 
 function PropiedadesContent() {
   const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({
-    search: searchParams.get("search") || undefined,
-    city: searchParams.get("city") || undefined,
-    sort: "recent",
-  });
+  const [filters, setFilters] = useState<Filters>(() =>
+    filtersFromParams(searchParams)
+  );
 
   useEffect(() => {
     setProperties(getProperties());
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    setFilters(filtersFromParams(searchParams));
+  }, [searchParams]);
 
   const filtered = filterProperties(properties, filters);
 

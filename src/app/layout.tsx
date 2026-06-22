@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "habitia | InmoConnect",
+    default: "habitia",
     template: "%s | habitia",
   },
   description:
-    "Encuentra tu hogar ideal en República Dominicana. Compra, vende o alquila propiedades con habitia - InmoConnect.",
+    "Encuentra tu hogar ideal en República Dominicana. Compra, vende o alquila propiedades con habitia.",
   keywords: ["inmobiliaria", "propiedades", "venta", "alquiler", "República Dominicana"],
 };
 

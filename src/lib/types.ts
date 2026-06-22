@@ -100,4 +100,5 @@ export interface PropertyFilters {
   bathrooms?: number;
   search?: string;
   sort?: SortOption;
+  featured?: boolean;
 }

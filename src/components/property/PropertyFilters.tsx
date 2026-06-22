@@ -130,6 +130,7 @@ export function filterProperties(
   if (filters.maxPrice) result = result.filter((p) => p.price <= filters.maxPrice!);
   if (filters.bedrooms) result = result.filter((p) => p.bedrooms >= filters.bedrooms!);
   if (filters.bathrooms) result = result.filter((p) => p.bathrooms >= filters.bathrooms!);
+  if (filters.featured) result = result.filter((p) => p.featured);
 
   switch (filters.sort) {
     case "price-asc":

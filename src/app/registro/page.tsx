@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -11,11 +11,20 @@ import { validateEmail, validatePhone } from "@/lib/utils";
 import { useApp } from "@/context/AppContext";
 import type { UserRole } from "@/lib/types";
 import { Building2, ShoppingBag } from "lucide-react";
+import { getPlanById, getDisplayPrice } from "@/lib/plans";
 
-export default function RegistroPage() {
+function RegistroForm() {
   const { setUser, addToast } = useApp();
   const router = useRouter();
-  const [role, setRole] = useState<UserRole>("buyer");
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get("plan");
+  const roleParam = searchParams.get("role");
+  const billingParam = searchParams.get("billing") as "monthly" | "yearly" | null;
+  const selectedPlan = planParam ? getPlanById(planParam) : undefined;
+
+  const [role, setRole] = useState<UserRole>(
+    roleParam === "seller" ? "seller" : "buyer"
+  );
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -26,6 +35,10 @@ export default function RegistroPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (roleParam === "seller") setRole("seller");
+  }, [roleParam]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -59,10 +72,14 @@ export default function RegistroPage() {
 
     const { password: _, ...safeUser } = user;
     setUser(safeUser as typeof user);
-    addToast("¡Cuenta creada exitosamente!");
+    addToast(
+      selectedPlan && role === "seller"
+        ? `¡Cuenta creada! Plan ${selectedPlan.name} seleccionado.`
+        : "¡Cuenta creada exitosamente!"
+    );
     setLoading(false);
 
-    if (role === "seller") router.push("/dashboard");
+    if (role === "seller") router.push("/dashboard/publicar");
     else router.push("/propiedades");
   };
 
@@ -70,8 +87,34 @@ export default function RegistroPage() {
     <div className="max-w-lg mx-auto px-4 py-12">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-title">Crear cuenta</h1>
-        <p className="text-muted mt-2">Únete a habitia - InmoConnect</p>
+        <p className="text-muted mt-2">Únete a habitia</p>
       </div>
+
+      {selectedPlan && role === "seller" && (
+        <div className="mb-6 p-4 rounded-xl border border-[#415a77]/30 bg-[#415a77]/5">
+          <p className="text-xs font-semibold text-[#415a77] uppercase tracking-wide mb-1">
+            Plan seleccionado
+          </p>
+          <p className="font-semibold text-title">
+            {selectedPlan.name} —{" "}
+            {getDisplayPrice(
+              selectedPlan,
+              billingParam === "yearly" ? "yearly" : "monthly"
+            ).amount}
+            {getDisplayPrice(
+              selectedPlan,
+              billingParam === "yearly" ? "yearly" : "monthly"
+            ).suffix}
+          </p>
+          <p className="text-sm text-muted mt-1">{selectedPlan.tagline}</p>
+          <Link
+            href="/planes"
+            className="text-xs text-secondary hover:underline mt-2 inline-block"
+          >
+            Cambiar plan
+          </Link>
+        </div>
+      )}
 
       <Card>
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -97,6 +140,15 @@ export default function RegistroPage() {
           </button>
         </div>
 
+        {role === "seller" && !selectedPlan && (
+          <p className="text-sm text-muted mb-4 text-center">
+            ¿Aún no eliges plan?{" "}
+            <Link href="/planes" className="text-secondary font-medium hover:underline">
+              Ver planes de publicación
+            </Link>
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Input label="Nombre *" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} error={errors.firstName} />
@@ -108,7 +160,7 @@ export default function RegistroPage() {
           <Input label="Confirmar contraseña *" type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} error={errors.confirmPassword} />
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creando cuenta..." : "Registrarse"}
+            {loading ? "Creando cuenta…" : "Registrarse"}
           </Button>
         </form>
 
@@ -120,5 +172,13 @@ export default function RegistroPage() {
         </p>
       </Card>
     </div>
+  );
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense fallback={<div className="max-w-lg mx-auto px-4 py-12 text-center text-muted">Cargando…</div>}>
+      <RegistroForm />
+    </Suspense>
   );
 }

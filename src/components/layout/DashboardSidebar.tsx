@@ -43,13 +43,13 @@ export function DashboardSidebar() {
 
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#0F172A] text-white flex flex-col transition-transform lg:translate-x-0",
+          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#0d1b2a] text-white flex flex-col transition-transform lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="p-6 border-b border-white/10">
           <Link href="/dashboard" className="block">
-            <span className="font-bold text-lg">InmoConnect</span>
+            <span className="font-bold text-lg lowercase" translate="no">habitia</span>
             <span className="text-xs text-gray-400 block">Panel de vendedor</span>
           </Link>
         </div>

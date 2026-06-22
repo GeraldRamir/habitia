@@ -1,14 +1,14 @@
 import type { PropertyType } from "./types";
 
 export const COLORS = {
-  primary: "#0F172A",
-  secondary: "#2563EB",
-  success: "#10B981",
-  warning: "#F59E0B",
-  background: "#F8FAFC",
-  card: "#FFFFFF",
-  title: "#111827",
-  muted: "#6B7280",
+  primary: "#0d1b2a",
+  secondary: "#415a77",
+  accent: "#778da9",
+  background: "#e0e1dd",
+  card: "#ffffff",
+  dark: "#1b263b",
+  title: "#0d1b2a",
+  muted: "#778da9",
 };
 
 export const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
@@ -48,6 +48,7 @@ export const CITIES = [
 export const NAV_LINKS = [
   { href: "/", label: "Inicio" },
   { href: "/propiedades", label: "Propiedades" },
+  { href: "/planes", label: "Planes" },
   { href: "/publicar", label: "Publicar" },
   { href: "/favoritos", label: "Favoritos" },
   { href: "/contacto", label: "Contacto" },

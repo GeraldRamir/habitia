@@ -31,7 +31,7 @@ export function AdminSidebar() {
 
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#0F172A] text-white flex flex-col transition-transform lg:translate-x-0",
+          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#0d1b2a] text-white flex flex-col transition-transform lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >

@@ -1,155 +1,169 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Building2, Users, Shield } from "lucide-react";
-import { motion } from "framer-motion";
-import { PropertyCard } from "@/components/property/PropertyCard";
-import { PropertyCardSkeleton } from "@/components/ui/Skeleton";
-import { Button } from "@/components/ui/Button";
-import { getProperties, getUserById } from "@/lib/storage";
-import { CITIES } from "@/lib/constants";
+import { getProperties } from "@/lib/storage";
 import type { Property } from "@/lib/types";
-import { useRouter } from "next/navigation";
+import type { HomeCategoryId } from "@/lib/home-categories";
+import { HomeSearchBar } from "@/components/home/HomeSearchBar";
+import { CategoryBar } from "@/components/home/CategoryBar";
+import { TypewriterText } from "@/components/home/TypewriterText";
+import {
+  HomePropertyCard,
+  HomePropertyCardSkeleton,
+} from "@/components/home/HomePropertyCard";
+import {
+  HomeFiltersModal,
+  applyHomeFilters,
+  DEFAULT_HOME_FILTERS,
+  type HomeFilters,
+} from "@/components/home/HomeFiltersModal";
+import { PricingPlans } from "@/components/home/PricingPlans";
+
+function filterByCategory(
+  properties: Property[],
+  category: HomeCategoryId
+): Property[] {
+  switch (category) {
+    case "all":
+      return properties;
+    case "casa":
+    case "apartamento":
+    case "terreno":
+    case "local":
+    case "oficina":
+      return properties.filter((p) => p.type === category);
+    case "frente-mar":
+      return properties.filter((p) =>
+        p.amenities.some((a) => a.toLowerCase().includes("mar"))
+      );
+    case "lujo":
+      return properties.filter((p) => p.price >= 300000);
+    case "venta":
+      return properties.filter((p) => p.status === "venta");
+    case "alquiler":
+      return properties.filter((p) => p.status === "alquiler");
+    case "destacadas":
+      return properties.filter((p) => p.featured);
+    default:
+      return properties;
+  }
+}
 
 export default function HomePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [city, setCity] = useState("");
-  const router = useRouter();
+  const [category, setCategory] = useState<HomeCategoryId>("all");
+  const [showTotalPrice, setShowTotalPrice] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<HomeFilters>(DEFAULT_HOME_FILTERS);
 
   useEffect(() => {
-    const props = getProperties().filter((p) => p.active);
-    setProperties(props);
+    setProperties(getProperties().filter((p) => p.active));
     setLoading(false);
   }, []);
 
-  const featured = properties.filter((p) => p.featured).slice(0, 6);
+  const filtered = useMemo(() => {
+    const byCategory = filterByCategory(properties, category);
+    return applyHomeFilters(byCategory, filters);
+  }, [properties, category, filters]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (search) params.set("search", search);
-    if (city) params.set("city", city);
-    router.push(`/propiedades?${params.toString()}`);
-  };
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div>
-      <section className="relative bg-[#0F172A] text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-transparent" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Encuentra tu hogar ideal con{" "}
-              <span className="text-secondary">InmoConnect</span>
-            </h1>
-            <p className="text-gray-300 text-lg mb-8">
-              La plataforma inmobiliaria más completa de República Dominicana.
-              Compra, vende o alquila con confianza.
-            </p>
-
-            <form onSubmit={handleSearch} className="card p-4 flex flex-col md:flex-row gap-3 max-w-2xl mx-auto !bg-white">
-              <div className="flex-1 relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar propiedades..."
-                  className="input !pl-10 !border-0 !bg-gray-50 text-title"
-                />
-              </div>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="input !border-0 !bg-gray-50 text-title md:w-48"
-              >
-                <option value="">Todas las ciudades</option>
-                {CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <Button type="submit" className="md:px-8">Buscar</Button>
-            </form>
-          </motion.div>
+    <div className="bg-background min-h-screen">
+      <section className="pt-8 pb-2 md:pt-12 md:pb-4 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center mb-8 md:mb-10">
+          <h1 className="text-2xl md:text-[36px] font-semibold text-title text-balance tracking-tight mb-3 min-h-[1.4em]">
+            <TypewriterText text="Encuentra la propiedad perfecta para ti" />
+          </h1>
+          <p className="text-muted text-sm md:text-base max-w-lg mx-auto text-pretty">
+            Compra, vende o alquila propiedades de forma rápida y segura en
+            República Dominicana.
+          </p>
         </div>
+        <HomeSearchBar />
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { icon: Building2, title: "Miles de propiedades", desc: "Casas, apartamentos, terrenos y más" },
-            { icon: Users, title: "Vendedores verificados", desc: "Confianza y transparencia garantizada" },
-            { icon: Shield, title: "Transacciones seguras", desc: "Proceso simple y protegido" },
-          ].map((item, i) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="card text-center p-6"
-            >
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mx-auto mb-4">
-                <item.icon size={24} className="text-secondary" />
-              </div>
-              <h3 className="font-semibold text-title mb-2">{item.title}</h3>
-              <p className="text-sm text-muted">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <CategoryBar
+        active={category}
+        onChange={setCategory}
+        showTotalPrice={showTotalPrice}
+        onToggleTotalPrice={() => setShowTotalPrice((v) => !v)}
+        onOpenFilters={() => setFiltersOpen(true)}
+        activeFilterCount={activeFilterCount}
+      />
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-title">Propiedades destacadas</h2>
-            <p className="text-muted mt-1">Las mejores opciones seleccionadas para ti</p>
-          </div>
-          <Link href="/propiedades">
-            <Button variant="outline">Ver todas</Button>
-          </Link>
-        </div>
+      <HomeFiltersModal
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        filters={filters}
+        onApply={setFilters}
+      />
 
+      <main
+        id="main-content"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10"
+      >
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <PropertyCardSkeleton key={i} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <HomePropertyCardSkeleton key={i} />
             ))}
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-lg font-medium text-title mb-2">
+              No hay propiedades con estos criterios
+            </p>
+            <p className="text-muted text-sm mb-6">
+              Prueba otra categoría o ajusta los filtros.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setCategory("all");
+                  setFilters(DEFAULT_HOME_FILTERS);
+                }}
+                className="text-sm font-semibold text-title underline underline-offset-4 hover:text-secondary transition-colors"
+              >
+                Ver todas las propiedades
+              </button>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(true)}
+                className="text-sm font-semibold text-secondary underline underline-offset-4 hover:opacity-80 transition-opacity"
+              >
+                Abrir filtros
+              </button>
+            </div>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((property) => {
-              const seller = getUserById(property.sellerId);
-              return (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  showSeller
-                  sellerVerified={seller?.verified}
-                />
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+            {filtered.map((property) => (
+              <HomePropertyCard
+                key={property.id}
+                property={property}
+                showTotalPrice={showTotalPrice}
+              />
+            ))}
           </div>
         )}
-      </section>
 
-      <section className="bg-secondary/5 py-16">
-        <div className="max-w-3xl mx-auto text-center px-4">
-          <h2 className="text-2xl font-bold text-title mb-4">¿Tienes una propiedad para vender?</h2>
-          <p className="text-muted mb-6">
-            Publica gratis y llega a miles de compradores potenciales en toda la República Dominicana.
-          </p>
-          <Link href="/publicar">
-            <Button size="lg">Publicar mi propiedad</Button>
-          </Link>
-        </div>
-      </section>
+        {!loading && filtered.length > 0 && (
+          <div className="text-center mt-12">
+            <Link
+              href="/propiedades"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-border text-sm font-semibold text-title hover:shadow-md hover:bg-card transition-[box-shadow,background-color] duration-300"
+            >
+              Mostrar más propiedades
+            </Link>
+          </div>
+        )}
+      </main>
+
+      <PricingPlans />
     </div>
   );
 }
